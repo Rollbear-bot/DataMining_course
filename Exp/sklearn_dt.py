@@ -14,69 +14,50 @@ from sklearn.model_selection import RepeatedKFold  # 交叉验证
 from seaborn import heatmap
 import matplotlib.pyplot as plt
 
-import graphviz
-import pydotplus
-from sklearn import tree
-from IPython.display import Image
-
 from util.preprocessing import *
+from util.tree_viz import dump_img
 
 
 def main():
     raw_x_train, y_train = split_x_y(drop_cols(get_train()))
     x_train = scale(raw_x_train)
 
-    raw_x_test, y_test = split_x_y(drop_cols(get_test()))
-    x_test = scale(raw_x_test)
+    # raw_x_test, y_test = split_x_y(drop_cols(get_test()))
+    # x_test = scale(raw_x_test)
 
-    dt = DecisionTreeClassifier()
-    # dt = RandomForestClassifier()
-    # dt = SVC()
+    # can adopt to other model here.
+    chosen_model = DecisionTreeClassifier
+    # chosen_model = RandomForestClassifier
+    # chosen_model = SVC
 
-    # cross validation, 10 folds, 10 cross
-    score_lt = []
-    kf = RepeatedKFold(n_splits=5, n_repeats=5, random_state=0)
-    for train_index, test_index in kf.split(x_train):
-        dt.fit(x_train[train_index], y_train[train_index])
-        pred = dt.predict(x_train[test_index])
-        score_lt.append(f1_score(y_train[test_index], pred))
+    # ==============================================
+    # 调参
+    # ==============================================
+    params_max_depth = range(1, 18)  # 树最大深度参数
+    avg_score_lt = []
+    for param_max_depth in params_max_depth:
+        # cross validation, 10 folds, 10 cross
+        score_lt = []
+        dt = None
+        kf = RepeatedKFold(n_splits=5, n_repeats=5, random_state=0)
+        for train_index, test_index in kf.split(x_train):
+            dt = chosen_model(max_depth=param_max_depth)
+            dt.fit(x_train[train_index], y_train[train_index])
+            pred = dt.predict(x_train[test_index])
+            score_lt.append(f1_score(y_train[test_index], pred))
 
-        # heatmap()
-        # plt.plot(dt.feature_importances_)
-        # plt.show()
+        # native f1-score: 0.6974379461520825
+        cur_iter_f1 = sum(score_lt) / len(score_lt)
+        avg_score_lt.append(cur_iter_f1)
+        print(f"max_depth: {param_max_depth}\tf1-score: {cur_iter_f1}")
 
-    # native f1-score: 0.6974379461520825
-    print(sum(score_lt) / len(score_lt))
+    plt.plot(params_max_depth, avg_score_lt)
+    plt.xlabel("max_depth")
+    plt.ylabel("f1_score")
+    plt.show()
 
-    # 可视化 via Jieling Lin
-    feature_name = [
-        "account_length",
-        "international_plan",
-        "voice_mail_plan",
-        "number_vmail_messages",
-        "total_day_minutes",
-        "total_day_calls",
-        "total_day_charge",
-        "total_eve_minutes",
-        "total_eve_calls",
-        "total_eve_charge",
-        "total_night_minutes",
-        "total_night_calls",
-        "total_night_charge",
-        "total_intl_minutes",
-        "total_intl_calls",
-        "total_intl_charge",
-        "number_customer_service_calls"
-    ]
-    target_name = ["0", "1"]
-    # 虚拟环境的PATH需要动态加载
-    os.environ["PATH"] += os.pathsep + 'D:/Graphviz/bin'
-    dot_tree = tree.export_graphviz(dt, out_file=None, feature_names=feature_name,
-                                    class_names=target_name, filled=True, rounded=True,
-                                    special_characters=True)
-    graph = pydotplus.graph_from_dot_data(dot_tree)
-    img = Image(graph.create_png())
-    graph.write_png("./resource/tree.png")
+    # 树可视化
+    # dump_img(dt, "tree_2.png")
 
 
 if __name__ == '__main__':
