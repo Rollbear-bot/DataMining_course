@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time: 2020/10/22 21:19
 # @Author: Rollbear
-# @Filename: hello_dt.py
+# @Filename: dt_demo.py
 
 from DesicionTree.CART_DT import CART
 from sklearn.model_selection import train_test_split
@@ -36,10 +36,9 @@ def main():
     y = [row[-1] for row in dataset]
 
     cart_tree = CART(max_tree_depth=2)
-
     cart_tree.fit(x_with_id, y, debug=True)
-    print(cart_tree.tree_root)
 
+    print(cart_tree.tree_root)
     predicted = cart_tree.predict(x)
 
 
