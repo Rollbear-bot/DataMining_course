@@ -5,6 +5,10 @@
 
 
 class DataProperty:
+    src_root = "C://Users/13592/PycharmProjects/DataMining_course/"
+    train_file_path = src_root + "Exp/churn_training.txt"
+    test_file_path = src_root + "Exp/churn_test.txt"
+    log_output = src_root + "Exp/resource/log/"
     feature_name = [
         "account_length",
         "international_plan",

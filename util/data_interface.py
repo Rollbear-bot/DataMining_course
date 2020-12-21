@@ -3,15 +3,14 @@
 # @Author: Rollbear
 # @Filename: data_interface.py
 
-train_file_path = "../Exp/churn_training.txt"
-test_file_path = "../Exp/churn_test.txt"
-
 import pandas as pd
+
+from util.values import DataProperty
 
 
 def get_train():
-    return pd.read_table(train_file_path)
+    return pd.read_table(DataProperty.train_file_path)
 
 
 def get_test():
-    return pd.read_table(test_file_path)
+    return pd.read_table(DataProperty.test_file_path)

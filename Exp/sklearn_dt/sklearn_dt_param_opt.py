@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time: 2020/11/19 19:06
 # @Author: Rollbear
-# @Filename: sklearn_dt.py
+# @Filename: sklearn_dt_param_opt.py
 import os
 
 import sklearn
@@ -19,11 +19,12 @@ from util.tree_viz import dump_img
 
 
 def main():
+    # ==============================================
+    # 数据加载与预处理
+    # ==============================================
+    scaler = StandardScaler()
     raw_x_train, y_train = split_x_y(drop_cols(get_train()))
-    x_train = scale(raw_x_train)
-
-    # raw_x_test, y_test = split_x_y(drop_cols(get_test()))
-    # x_test = scale(raw_x_test)
+    x_train = scaler.fit_transform(raw_x_train)
 
     # can adopt to other model here.
     chosen_model = DecisionTreeClassifier
@@ -32,8 +33,9 @@ def main():
 
     # ==============================================
     # 调参
+    # todo::直接用校验集和测试集，不用交叉验证
     # ==============================================
-    params_max_depth = range(1, 18)  # 树最大深度参数
+    params_max_depth = range(1, 30)  # 树最大深度参数
     avg_score_lt = []
     for param_max_depth in params_max_depth:
         # cross validation, 10 folds, 10 cross
